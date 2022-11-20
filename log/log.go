@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io"
 	"os"
 	"sync"
 
@@ -9,6 +10,7 @@ import (
 
 // Re-exporting
 type Fields = logrus.Fields
+type Level = logrus.Level
 
 var (
 	instance *logrus.Logger
@@ -26,7 +28,19 @@ func initLogger() {
 	})
 }
 
-func LoggerForPackage(module string) *logrus.Entry {
+func LoggerForPackage(pkg string) *logrus.Entry {
 	initLogger()
-	return instance.WithField("package", module)
+	return instance.WithField("package", pkg)
+}
+
+func SetOutput(w io.Writer) {
+	instance.Out = w
+}
+
+func SetLevel(l Level) {
+	instance.Level = l
+}
+
+func ParseLevel(l string) (Level, error) {
+	return logrus.ParseLevel(l)
 }

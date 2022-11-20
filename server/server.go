@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/Matir/redcache/config"
-	"github.com/Matir/redcache/fetcher"
 	"github.com/Matir/redcache/log"
 )
 
@@ -24,15 +23,19 @@ type CloseLenReader interface {
 	Len() int
 }
 
+type Fetcher interface {
+	FetchTool(context.Context, config.Tool) (io.ReadCloser, error)
+}
+
 type CacheServer struct {
 	listenAddr string
 	toolMap    map[string]config.Tool
 	serveIndex bool
 	rootPrefix string
-	fetchCache *fetcher.FetchCache
+	fetchCache Fetcher
 }
 
-func NewCacheServer(cfg *config.Config) (*CacheServer, error) {
+func NewCacheServer(cfg *config.Config, fetcher Fetcher) (*CacheServer, error) {
 	toolMap, err := cfg.GetToolMap()
 	if err != nil {
 		return nil, err
@@ -42,6 +45,7 @@ func NewCacheServer(cfg *config.Config) (*CacheServer, error) {
 		toolMap:    toolMap,
 		serveIndex: !cfg.HideIndex,
 		rootPrefix: cfg.RootPath,
+		fetchCache: fetcher,
 	}
 	if !strings.HasSuffix(rv.rootPrefix, "/") {
 		rv.rootPrefix += "/"
