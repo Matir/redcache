@@ -60,6 +60,10 @@ func (c *FetchCache) FetchTool(ctx context.Context, tool config.Tool) (io.ReadCl
 		return rdr, nil
 	}
 	// Write rdr to cache with copy
+	if err := os.MkdirAll(c.cacheDir, fs.ModeDir|0755); err != nil {
+		logger.WithField("err", err).Error("Failed making cache dir.")
+		return nil, err
+	}
 	fp, err := os.Create(filepath.Join(c.cacheDir, cacheName))
 	if err != nil {
 		logger.WithFields(log.Fields{

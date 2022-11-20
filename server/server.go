@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
+	html "html/template"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/Matir/redcache/config"
 	"github.com/Matir/redcache/log"
@@ -13,6 +16,13 @@ import (
 
 const (
 	SERVER_NAME = "RedCache/1.x"
+)
+
+var (
+	//go:embed index.html
+	indexTemplateString string
+	indexTemplate       *html.Template
+	indexOnce           sync.Once
 )
 
 var logger = log.LoggerForPackage("server")
@@ -29,7 +39,7 @@ type Fetcher interface {
 
 type CacheServer struct {
 	listenAddr string
-	toolMap    map[string]config.Tool
+	toolMap    config.ToolMap
 	serveIndex bool
 	rootPrefix string
 	fetchCache Fetcher
@@ -76,7 +86,12 @@ func (srv *CacheServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		srv.Serve404(ctx, w, r)
 		return
 	}
-	reqPath = strings.TrimLeft(reqPath, srv.rootPrefix)
+	reqPath = strings.TrimPrefix(reqPath, srv.rootPrefix)
+	// check for index
+	if srv.serveIndex && (reqPath == "/" || reqPath == "") {
+		srv.ServeIndex(ctx, w, r)
+		return
+	}
 	if tool, ok := srv.toolMap[reqPath]; ok {
 		srv.ServeTool(ctx, w, r, tool)
 		return
@@ -115,4 +130,38 @@ func (srv *CacheServer) ServeTool(ctx context.Context, w http.ResponseWriter, r 
 			"err":        err,
 		}).Error("Failed copying to client.")
 	}
+}
+
+type toolPair struct {
+	Name string
+	Path string
+}
+
+type indexTemplateData struct {
+	Tools []toolPair
+}
+
+func (srv *CacheServer) ServeIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	tmpl := getIndexTemplate()
+	data := indexTemplateData{
+		Tools: make([]toolPair, 0),
+	}
+	iter := srv.toolMap.Iterate()
+	for iter.Next() {
+		key, tool := iter.Item()
+		data.Tools = append(data.Tools, toolPair{
+			Name: tool.Name,
+			Path: key,
+		})
+	}
+	if err := tmpl.Execute(w, data); err != nil {
+		logger.WithField("err", err).Error("Error rendering template.")
+	}
+}
+
+func getIndexTemplate() *html.Template {
+	indexOnce.Do(func() {
+		indexTemplate = html.Must(html.New("index").Parse(indexTemplateString))
+	})
+	return indexTemplate
 }
