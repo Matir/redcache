@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/encoding/prototext"
 
 	"github.com/Matir/redcache/config/pb"
 )
@@ -31,7 +31,7 @@ func LoadConfigFromReader(r io.Reader) (*Config, error) {
 		return nil, err
 	}
 	var cfg Config
-	if err := proto.Unmarshal(data, &cfg.Config); err != nil {
+	if err := prototext.Unmarshal(data, &cfg.Config); err != nil {
 		return nil, err
 	}
 	return &cfg, nil

@@ -34,13 +34,15 @@ func main() {
 		os.Exit(1)
 	}
 	log.SetLevel(loglevel)
-	logfp, err := os.Create(*logFileFlag)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error opening log file (%s): %s\n", *logFileFlag, err)
-		os.Exit(1)
+	if *logFileFlag != "" {
+		logfp, err := os.Create(*logFileFlag)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error opening log file (%s): %s\n", *logFileFlag, err)
+			os.Exit(1)
+		}
+		defer logfp.Close()
+		log.SetOutput(logfp)
 	}
-	defer logfp.Close()
-	log.SetOutput(logfp)
 	logger := log.LoggerForPackage("main")
 
 	var mainConfig *config.Config
