@@ -1,0 +1,48 @@
+syntax = "proto3";
+package config;
+
+option go_package = "github.com/Matir/redcache/config/pb";
+
+message Config {
+    // List of tools to serve
+    repeated Tool tool = 1;
+    // Path to prepend to all other paths
+    string root_path = 2;
+    // Hide the index page
+    bool hide_index = 3;
+}
+
+// Tool is a single servable tool entry
+message Tool {
+    // Visible name for tool
+    string name = 1;
+    // Path(s) under which to serve tool
+    // Launching fails if this is not globally unique
+    repeated string path = 2;
+    // Sources to obtain the tool
+    repeated ToolSource source = 3;
+    // Hashes to verify before serving
+    repeated FileHash hash = 4;
+    // Should we attempt to embed this?
+    bool embed = 5;
+}
+
+// Toolsource describes a single source for getting the tool.
+message ToolSource {
+    // The path to obtain the tool.
+    // May be a local path or a HTTP(S) path to be retrieved.
+    string source_path = 1;
+    // If the source path is a supported archive, this path is extracted.
+    string archive_path = 2;
+}
+
+enum FileHashType {
+    SHA256 = 0;
+}
+
+message FileHash {
+    // Type of hash to compute
+    FileHashType type = 1;
+    // Value of hash
+    string hash = 2;
+}
