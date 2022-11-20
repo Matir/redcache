@@ -1,4 +1,4 @@
-package core
+package fetcher
 
 import (
 	"context"
@@ -16,7 +16,7 @@ const (
 	USER_AGENT = "redcache/fetcher Go/1.x"
 )
 
-var logger = log.LoggerForModule("core")
+var logger = log.LoggerForPackage("fetcher")
 
 // Fetches (and extracts) a tool source
 func FetchToolSource(ctx context.Context, src *config_pb.ToolSource) (io.ReadCloser, error) {

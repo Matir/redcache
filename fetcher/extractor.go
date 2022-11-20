@@ -1,4 +1,4 @@
-package core
+package fetcher
 
 import (
 	"archive/tar"

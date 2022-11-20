@@ -26,7 +26,7 @@ func initLogger() {
 	})
 }
 
-func LoggerForModule(module string) *logrus.Entry {
+func LoggerForPackage(module string) *logrus.Entry {
 	initLogger()
-	return instance.WithField("module", module)
+	return instance.WithField("package", module)
 }
