@@ -11,6 +11,7 @@ import (
 // Re-exporting
 type Fields = logrus.Fields
 type Level = logrus.Level
+type Entry = logrus.Entry
 
 var (
 	instance *logrus.Logger

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -20,6 +21,8 @@ var (
 	logFileFlag    = flag.String("log-file", "", "Log file for logging (default stderr)")
 	configFileFlag = flag.String("config", "", "Path to config file.")
 	listenAddrFlag = flag.String("listen-addr", "", "Listen address (overrides config)")
+	cacheDirFlag   = flag.String("cache-dir", "", "Cache directory (overrides config)")
+	preCacheFlag   = flag.Bool("precache", false, "Download tools to cache directory and exit.")
 
 	// Should this be somewhere else?
 	//go:embed config.asciipb
@@ -65,8 +68,16 @@ func main() {
 	}
 
 	// Build the fetcher
+	if *cacheDirFlag != "" {
+		mainConfig.CacheDir = *cacheDirFlag
+	}
 	cacheDir := expandUser(mainConfig.CacheDir)
 	fetchImpl := fetcher.NewFetchCache(cacheDir)
+
+	if *preCacheFlag {
+		runPrecache(logger, mainConfig, fetchImpl)
+		return
+	}
 
 	// Override listen addr
 	if *listenAddrFlag != "" {
@@ -111,4 +122,18 @@ func expandUser(path string) string {
 	}
 	pieces[0] = homedir
 	return filepath.Join(pieces...)
+}
+
+func runPrecache(logger *log.Entry, cfg *config.Config, fetchImpl *fetcher.FetchCache) {
+	ctx := context.Background()
+	ct := 0
+	for _, tool := range cfg.Tool {
+		logger.WithField("tool", tool.Name).Info("Caching tool.")
+		rdr, err := fetchImpl.FetchTool(ctx, config.Tool{Tool: tool})
+		if err == nil {
+			ct++
+			rdr.Close()
+		}
+	}
+	logger.WithField("count", ct).Info("Cached tools.")
 }
