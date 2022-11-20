@@ -10,6 +10,8 @@ message Config {
     string root_path = 2;
     // Hide the index page
     bool hide_index = 3;
+    // Listenaddr, as in 0.0.0.0:6666
+    string listen_addr = 4;
 }
 
 // Tool is a single servable tool entry
