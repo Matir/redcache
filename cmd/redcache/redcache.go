@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Matir/redcache/config"
 	"github.com/Matir/redcache/fetcher"
@@ -100,7 +101,7 @@ func LoadEmbeddedConfig() (*config.Config, error) {
 // If the path starts with ~/, we expand the current user's homedir.
 // This does not support ~name style.
 func expandUser(path string) string {
-	pieces := filepath.SplitList(path)
+	pieces := strings.Split(path, string(filepath.Separator))
 	if pieces[0] != "~" {
 		return path
 	}

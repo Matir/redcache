@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -28,6 +29,7 @@ type FetchCache struct {
 }
 
 func NewFetchCache(cacheDir string) *FetchCache {
+	logger.WithField("cachedir", cacheDir).Info("Using local cache dir.")
 	return &FetchCache{
 		cacheDir:   cacheDir,
 		cacheFs:    os.DirFS(cacheDir),
@@ -47,7 +49,19 @@ func (c *FetchCache) FetchTool(ctx context.Context, tool config.Tool) (io.ReadCl
 		}).Info("Serving from embed.")
 		return io.NopCloser(bytes.NewBuffer(data)), nil
 	}
-	// TODO: check cachedir
+	// check cachedir
+	if fp, err := c.cacheFs.Open(cacheName); err == nil {
+		logger.WithFields(log.Fields{
+			"tool":      tool.String(),
+			"cacheName": cacheName,
+		}).Info("Serving from FS cache.")
+		return fp, nil
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		logger.WithFields(log.Fields{
+			"cacheName": cacheName,
+			"err":       err,
+		}).Error("Error opening from cache.")
+	}
 	// source files
 	rdr, err := c.fetchToolNoCache(ctx, tool)
 	if err != nil {
