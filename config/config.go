@@ -23,6 +23,23 @@ type Tool struct {
 	*pb.Tool
 }
 
+var (
+	platformNames = map[pb.Tool_Platform]string{
+		pb.Tool_PLATFORM_UNKNOWN: "(Unknown)",
+		pb.Tool_PLATFORM_ANY:     "Any",
+		pb.Tool_PLATFORM_LINUX:   "Linux",
+		pb.Tool_PLATFORM_WINDOWS: "Windows",
+		pb.Tool_PLATFORM_OSX:     "OS X",
+	}
+	archNames = map[pb.Tool_Architecture]string{
+		pb.Tool_ARCH_UNKNOWN: "(Unknown)",
+		pb.Tool_ARCH_ANY:     "Any",
+		pb.Tool_ARCH_X86:     "x86",
+		pb.Tool_ARCH_X64:     "x86_64",
+		pb.Tool_ARCH_ARM:     "ARM",
+	}
+)
+
 type ToolMap map[string]Tool
 
 func LoadConfigFromReader(r io.Reader) (*Config, error) {
@@ -62,6 +79,20 @@ func (t Tool) GetCacheName() string {
 
 func (t Tool) String() string {
 	return t.Name
+}
+
+func (t Tool) GetPlatformName() string {
+	if v, ok := platformNames[t.Platform]; ok {
+		return v
+	}
+	return t.Platform.String()
+}
+
+func (t Tool) GetArchName() string {
+	if v, ok := archNames[t.Arch]; ok {
+		return v
+	}
+	return t.Arch.String()
 }
 
 func (t ToolMap) Iterate() toolMapIterator {

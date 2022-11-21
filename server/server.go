@@ -171,8 +171,8 @@ func (srv *CacheServer) ServeIndex(ctx context.Context, w http.ResponseWriter, r
 			Name: tool.Name,
 			Path: key,
 		})
-		osName := tool.Platform.String()
-		archName := tool.Arch.String()
+		osName := tool.GetPlatformName()
+		archName := tool.GetArchName()
 		if _, ok := data.NestedTools[osName]; !ok {
 			data.NestedTools[osName] = make(map[string][]toolPair)
 		}

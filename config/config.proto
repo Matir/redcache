@@ -48,7 +48,7 @@ message Tool {
         ARCH_ANY = 1;
         ARCH_X86 = 2;
         ARCH_X64 = 3;
-        ARCH_ADM = 4;
+        ARCH_ARM = 4;
     }
 
     // Platform and architecture
