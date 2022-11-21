@@ -9,11 +9,16 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 
 	"github.com/Matir/redcache/config"
 	"github.com/Matir/redcache/log"
+)
+
+const (
+	embedCacheDirName = "cachedir"
 )
 
 var (
@@ -41,7 +46,7 @@ func (c *FetchCache) FetchTool(ctx context.Context, tool config.Tool) (io.ReadCl
 	listCache()
 	cacheName := tool.GetCacheName()
 	// check embeds
-	if data, err := cacheEmbedFS.ReadFile(cacheName); err == nil {
+	if data, err := cacheEmbedFS.ReadFile(path.Join(embedCacheDirName, cacheName)); err == nil {
 		// wrap in a buffer and return
 		logger.WithFields(log.Fields{
 			"tool":      tool.String(),
@@ -116,7 +121,7 @@ func (c *FetchCache) fetchToolNoCache(ctx context.Context, tool config.Tool) (io
 func listCache() {
 	listCacheOnce.Do(func() {
 		cacheInitLog := log.LoggerForPackage("cache")
-		dirEnts, err := cacheEmbedFS.ReadDir(".")
+		dirEnts, err := cacheEmbedFS.ReadDir(embedCacheDirName)
 		if err != nil {
 			cacheInitLog.WithField("err", err).Error("Error getting directory list from cache embed dir.")
 			return
