@@ -19,6 +19,7 @@ type Extractor interface {
 	Name() string
 	Identifier(*bytes.Buffer) bool
 	Extract(*bytes.Buffer, string) (io.ReadCloser, error)
+	Decompress(io.ReadCloser) (io.ReadCloser, error)
 }
 
 type TarExtractor string
@@ -59,6 +60,16 @@ func extractFromBuffer(buf *bytes.Buffer, path string) (io.ReadCloser, error) {
 	}
 
 	return nil, errors.New("no valid extractor found")
+}
+
+// Decompress but not archive extraction.
+func DecompressSource(ctx context.Context, src io.ReadCloser, name string) (io.ReadCloser, error) {
+	for _, ex := range extractors {
+		if ex.Name() == name {
+			return ex.Decompress(src)
+		}
+	}
+	return nil, fmt.Errorf("no extractor found for %s", name)
 }
 
 func pathStringsMatch(a, b string) bool {
@@ -109,6 +120,10 @@ func (TarExtractor) Extract(buf *bytes.Buffer, path string) (io.ReadCloser, erro
 	}
 }
 
+func (t TarExtractor) Decompress(io.ReadCloser) (io.ReadCloser, error) {
+	return nil, fmt.Errorf("not implemented for %s", string(t))
+}
+
 // Zip File Implementation
 func (z ZipExtractor) Name() string {
 	return string(z)
@@ -147,6 +162,10 @@ func (ZipExtractor) Extract(buf *bytes.Buffer, path string) (io.ReadCloser, erro
 	return io.NopCloser(&destBuf), nil
 }
 
+func (z ZipExtractor) Decompress(io.ReadCloser) (io.ReadCloser, error) {
+	return nil, fmt.Errorf("not implemented for %s", string(z))
+}
+
 // Gzip compression layer
 func (g GzipExtractor) Name() string {
 	return string(g)
@@ -171,6 +190,20 @@ func (GzipExtractor) Extract(buf *bytes.Buffer, path string) (io.ReadCloser, err
 	return extractFromBuffer(&tmpbuf, path)
 }
 
+func (GzipExtractor) Decompress(src io.ReadCloser) (io.ReadCloser, error) {
+	gzrdr, err := gzip.NewReader(src)
+	if err != nil {
+		logger.WithField("err", err).Error("Error opening gzip.")
+		return nil, fmt.Errorf("error reading gzip: %w", err)
+	}
+	var tmpbuf bytes.Buffer
+	if _, err := io.Copy(&tmpbuf, gzrdr); err != nil {
+		logger.WithField("err", err).Error("Error reading gzip.")
+		return nil, fmt.Errorf("error reading gzip: %w", err)
+	}
+	return io.NopCloser(&tmpbuf), nil
+}
+
 // Bzip compression layer
 func (b BzipExtractor) Name() string {
 	return string(b)
@@ -189,4 +222,14 @@ func (BzipExtractor) Extract(buf *bytes.Buffer, path string) (io.ReadCloser, err
 		return nil, fmt.Errorf("error reading bzip2: %w", err)
 	}
 	return extractFromBuffer(&tmpbuf, path)
+}
+
+func (BzipExtractor) Decompress(src io.ReadCloser) (io.ReadCloser, error) {
+	rdr := bzip2.NewReader(src)
+	var tmpbuf bytes.Buffer
+	if _, err := io.Copy(&tmpbuf, rdr); err != nil {
+		logger.WithField("err", err).Error("Error opening bzip2.")
+		return nil, fmt.Errorf("error reading bzip2: %w", err)
+	}
+	return io.NopCloser(&tmpbuf), nil
 }

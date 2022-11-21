@@ -78,3 +78,47 @@ tool: {
         source_path: "https://github.com/carlospolop/PEASS-ng/releases/download/20221120/winPEASany_ofs.exe"
     }
 }
+
+tool: {
+    name: "chisel - Windows - x86"
+    path: "windows/x86/chisel"
+    embed: true
+    filename: "chisel.exe"
+    source: {
+        source_path: "https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_windows_386.gz"
+        decompress_with: "gzip"
+    }
+}
+
+tool: {
+    name: "chisel - Windows - x64"
+    path: "windows/x64/chisel"
+    embed: true
+    filename: "chisel.exe"
+    source: {
+        source_path: "https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_windows_amd64.gz"
+        decompress_with: "gzip"
+    }
+}
+
+tool: {
+    name: "chisel - Linux - x86"
+    path: "linux/x86/chisel"
+    embed: true
+    filename: "chisel"
+    source: {
+        source_path: "https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_386.gz"
+        decompress_with: "gzip"
+    }
+}
+
+tool: {
+    name: "chisel - Linux - amd64"
+    path: "linux/x64/chisel"
+    embed: true
+    filename: "chisel"
+    source: {
+        source_path: "https://github.com/jpillora/chisel/releases/download/v1.7.7/chisel_1.7.7_linux_amd64.gz"
+        decompress_with: "gzip"
+    }
+}

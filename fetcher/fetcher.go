@@ -45,6 +45,11 @@ func FetchToolSource(ctx context.Context, src *config_pb.ToolSource) (io.ReadClo
 		defer rdr.Close()
 		return ExtractFromArchive(ctx, rdr, src.ArchivePath)
 	}
+	if src.DecompressWith != "" {
+		// Decompress only
+		defer rdr.Close()
+		return DecompressSource(ctx, rdr, src.DecompressWith)
+	}
 	return rdr, nil
 }
 

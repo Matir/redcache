@@ -43,6 +43,8 @@ message ToolSource {
     string source_path = 1;
     // If the source path is a supported archive, this path is extracted.
     string archive_path = 2;
+    // If the file is compressed, but not an archive, decompress with this.
+    string decompress_with = 3;
 }
 
 enum FileHashType {
