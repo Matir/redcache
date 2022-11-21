@@ -154,18 +154,29 @@ type toolPair struct {
 }
 
 type indexTemplateData struct {
-	Tools []toolPair
+	Tools       []toolPair
+	NestedTools map[string]map[string][]toolPair
 }
 
 func (srv *CacheServer) ServeIndex(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	tmpl := getIndexTemplate()
 	data := indexTemplateData{
-		Tools: make([]toolPair, 0),
+		Tools:       make([]toolPair, 0),
+		NestedTools: make(map[string]map[string][]toolPair),
 	}
 	iter := srv.toolMap.Iterate()
 	for iter.Next() {
 		key, tool := iter.Item()
 		data.Tools = append(data.Tools, toolPair{
+			Name: tool.Name,
+			Path: key,
+		})
+		osName := tool.Platform.String()
+		archName := tool.Arch.String()
+		if _, ok := data.NestedTools[osName]; !ok {
+			data.NestedTools[osName] = make(map[string][]toolPair)
+		}
+		data.NestedTools[osName][archName] = append(data.NestedTools[osName][archName], toolPair{
 			Name: tool.Name,
 			Path: key,
 		})

@@ -1,10 +1,16 @@
 <html>
     <title>RedCache</title>
     <body>
-        <ul>
-            {{range .Tools}}
-            <li><a href="/{{.Path}}">{{.Name}}</a></li>
+        {{range $os, $ostools := .NestedTools}}
+        <h2>{{$os}}</h2>
+            {{range $arch, $tools := $ostools}}
+            <h3>{{$arch}}</h3>
+            <ul>
+                {{range $tools}}
+                <li><a href="/{{.Path}}">{{.Name}}</a></li>
+                {{end}}
+            </ul>
             {{end}}
-        </ul>
+        {{end}}
     </body>
 </html>
