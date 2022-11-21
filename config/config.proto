@@ -29,6 +29,11 @@ message Tool {
     repeated FileHash hash = 4;
     // Should we attempt to embed this?
     bool embed = 5;
+    // Filename to provide when serving
+    // If empty, last component of path is used
+    string filename = 6;
+    // Content-type, otherwise application/octet-stream
+    string content_type = 7;
 }
 
 // Toolsource describes a single source for getting the tool.

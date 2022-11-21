@@ -3,10 +3,78 @@ listen_addr: "0.0.0.0:9999"
 cache_dir: "~/.cache/redcache"
 
 tool: {
-    name: "ncat - Windows - x64"
-    path: "windows/x64/ncat"
+    name: "ncat - Linux - x64"
+    path: "linux/x64/ncat"
     embed: true
     source: {
         source_path: "https://gitlab.com/pentest-tools/static-binaries/-/raw/master/binaries/linux/x86_64/ncat?inline=false"
+    }
+}
+
+tool: {
+    name: "ncat - Windows - x32"
+    path: "windows/x32/ncat"
+    embed: true
+    filename: "ncat.exe"
+    source: {
+        source_path: "https://gitlab.com/pentest-tools/static-binaries/-/raw/master/binaries/windows/x86/ncat.exe?inline=false"
+    }
+}
+
+tool: {
+    name: "socat - Linux - x64"
+    path: "linux/x64/socat"
+    embed: true
+    source: {
+        source_path: "https://gitlab.com/pentest-tools/static-binaries/-/raw/master/binaries/linux/x86_64/socat?inline=false"
+    }
+}
+
+tool: {
+    name: "socat - OS X - x64"
+    path: "osx/x64/socat"
+    embed: true
+    source: {
+        source_path: "https://github.com/andrew-d/static-binaries/raw/master/binaries/darwin/socat"
+    }
+}
+
+tool: {
+    name: "linpeas.sh - Linux"
+    path: "linux/linpeas.sh"
+    embed: true
+    filename: "linpeas.sh"
+    content_type: "application/x-sh"
+    source: {
+        source_path: "https://github.com/carlospolop/PEASS-ng/releases/download/20221120/linpeas.sh"
+    }
+}
+
+tool: {
+    name: "linpeas - Linux - x64"
+    path: "linux/x64/linpeas"
+    embed: true
+    source: {
+        source_path: "https://github.com/carlospolop/PEASS-ng/releases/download/20221120/linpeas_linux_amd64"
+    }
+}
+
+tool: {
+    name: "winpeas - Windows - BAT"
+    path: "windows/bat/winpeas"
+    embed: true
+    filename: "winpeas.bat"
+    source: {
+        source_path: "https://github.com/carlospolop/PEASS-ng/releases/download/20221120/winPEAS.bat"
+    }
+}
+
+tool: {
+    name: "winpeas - Windows - Any"
+    path: "windows/any/winpeas"
+    embed: true
+    filename: "winpeas.exe"
+    source: {
+        source_path: "https://github.com/carlospolop/PEASS-ng/releases/download/20221120/winPEASany_ofs.exe"
     }
 }

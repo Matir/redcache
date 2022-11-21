@@ -7,6 +7,8 @@ import (
 	html "html/template"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strings"
 	"sync"
 
@@ -123,6 +125,20 @@ func (srv *CacheServer) ServeTool(ctx context.Context, w http.ResponseWriter, r 
 	defer rdr.Close()
 	if lenrdr, ok := rdr.(CloseLenReader); ok {
 		w.Header().Add("Content-Length", fmt.Sprintf("%d", lenrdr.Len()))
+	}
+	filename := tool.Filename
+	if filename == "" {
+		pth := strings.TrimRight(r.URL.Path, "/")
+		_, file := path.Split(pth)
+		filename = file
+	}
+	if filename != "" {
+		w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", url.QueryEscape(filename)))
+	}
+	if tool.ContentType != "" {
+		w.Header().Add("Content-Type", tool.ContentType)
+	} else {
+		w.Header().Add("Content-Type", "application/octet-stream")
 	}
 	if n, err := io.Copy(w, rdr); err != nil {
 		logger.WithFields(log.Fields{
